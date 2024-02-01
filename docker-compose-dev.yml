@@ -1,0 +1,22 @@
+services:
+  app:
+    container_name: market-price-api
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    # depends_on:
+    #   - postgres
+    # links:
+    #   - postgres
+
+  # db:
+  #   container_name: market-price-db
+  #   image: postgres
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_DB: ${DB_DATABASE}
+  #     POSTGRES_USER: ${DB_USERNAME}      
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
