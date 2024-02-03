@@ -5,18 +5,24 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./src/index.ts"
+    "dev": "nodemon ./src/index.ts",
+    "migration:generate": "drizzle-kit generate:pg --schema=./db/schema.ts",
+    "migration:push": "drizzle-kit push:pg"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "drizzle-orm": "^0.29.3",
+    "express": "^4.18.2",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.16",
+    "@types/pg": "^8.11.0",
     "dotenv": "^16.4.1",
+    "drizzle-kit": "^0.20.14",
     "nodemon": "^3.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
