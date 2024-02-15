@@ -10,11 +10,9 @@ class MarketController {
   }
   
   async index(req: Request, res: Response): Promise<Response> {
-
     const markets = await this.repository.fetchAll();
-    
-    return res.json(markets);
-  }
+    return res.status(200).json(markets);
+  }  
 }
 
 export default new MarketController(new MarketRepository());
