@@ -1,53 +1,98 @@
 import { Request, Response } from 'express'
 import { MarketRepository } from '../repositories/MarketRepository';
-import { MarketService } from '../services/MarketService';
-import { insertMarketSchema } from '../../db/schema';
 import { formatZodError } from '../utils/formatErrors';
-import { ZodError } from 'zod';
+import { StatusCode } from '../utils/statusCode';
+import { requestMarketSchema } from '../../db/schema';
 
 class MarketController {
 
   private repository: MarketRepository;
-  private service: MarketService;
 
-  constructor (repository: MarketRepository, service: MarketService) {
+  constructor (repository: MarketRepository) {
     this.repository = repository;
-    this.service = service;
   }
   
   public async index(req: Request, res: Response) {
-    const markets = await this.repository.fetchAll();
-    return res.status(200).json(markets);
+    
+    try {
+      
+      const markets = await this.repository.findAll();
+
+      return res.status(StatusCode.OK).json({ data: markets });
+
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        error : "Failed to get markets."
+      });
+    }
+    
   }  
   
   public async create(req: Request, res: Response) {
 
-    const body = insertMarketSchema.safeParse(req.body);
+    const body = requestMarketSchema.safeParse(req.body);
 
     if (!body.success) {
       const error = body.error;
-      res.status(400).json({
+      res.status(StatusCode.BAD_REQUEST).json({
         error: formatZodError(error)
       });
       return;
     }
     
     try {
+      const createdMarket = await this.repository.insert(body.data.name);
 
-      const createdMarket = await this.service.create(body.data.name);
-      res.status(201).json({
+      res.status(StatusCode.CREATED).json({
         market: createdMarket
       });
       
     } catch (error) {
       
-      res.status(500).json({
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         error: {
-          message: "Failed to create market",
+          message: "Failed to create market.",
+        },
+      });
+    }
+  }
+
+  public async update(req: Request, res: Response) {
+    
+    const marketId = req.params.id;
+  
+    if (!marketId || typeof marketId !== "string") {
+      console.log(marketId);
+      res.status(StatusCode.BAD_REQUEST).json({
+        error: "You must provide an ID."
+      });
+      return;
+    }
+
+    const body = requestMarketSchema.safeParse(req.body);
+
+    if (!body.success) {
+      const error = body.error;
+      res.status(StatusCode.BAD_REQUEST).json({
+        error: formatZodError(error)
+      });
+      return;
+    }
+
+    try {
+      
+      await this.repository.update(marketId, body.data.name);
+
+      res.status(StatusCode.NO_CONTENT).send();
+
+    } catch (error) {
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        error: {
+          message: "Failed to update market.",
         },
       });
     }
   }
 }
 
-export default new MarketController(new MarketRepository(), new MarketService());
+export default new MarketController(new MarketRepository());

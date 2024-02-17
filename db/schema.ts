@@ -8,13 +8,15 @@ export const markets = pgTable('markets', {
   name: varchar('name', { length: 256 }).notNull(),
 });
 
+export const selectMarketSchema = createSelectSchema(markets);
 export const insertMarketSchema = createInsertSchema(markets, {
   id: z.string().uuid(),
-  name: z.string().transform(value => value.replace(/\s+/g, ''))
-                  .pipe(z.string().min(1, { message: "The market name is required" }))
-}).omit({ id : true });
+  name: z.string().trim().min(1)
+});
 
-export type Market = InferSelectModel<typeof markets>
+export const requestMarketSchema = insertMarketSchema.pick({ name: true });
+export type Market = z.infer<typeof selectMarketSchema>;
+export type InsertMarket = z.infer<typeof insertMarketSchema>;
 
 // =================================================================
 
