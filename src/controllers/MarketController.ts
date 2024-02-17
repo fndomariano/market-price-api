@@ -3,6 +3,7 @@ import { MarketRepository } from '../repositories/MarketRepository';
 import { formatZodError } from '../utils/formatErrors';
 import { StatusCode } from '../utils/statusCode';
 import { requestMarketSchema } from '../../db/schema';
+import { HttpNotFoundError } from '../errors/HttpNotFoundError';
 
 class MarketController {
 
@@ -62,7 +63,6 @@ class MarketController {
     const marketId = req.params.id;
   
     if (!marketId || typeof marketId !== "string") {
-      console.log(marketId);
       res.status(StatusCode.BAD_REQUEST).json({
         error: "You must provide an ID."
       });
@@ -86,6 +86,16 @@ class MarketController {
       res.status(StatusCode.NO_CONTENT).send();
 
     } catch (error) {
+
+      if (error instanceof HttpNotFoundError) {
+        res.status(StatusCode.NOT_FOUND).json({
+          error: {
+            message: error.message,
+          },
+        });
+        return;
+      }
+
       res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         error: {
           message: "Failed to update market.",
@@ -93,6 +103,41 @@ class MarketController {
       });
     }
   }
+
+  public async delete(req: Request, res: Response) {
+    const marketId = req.params.id;
+  
+    if (!marketId || typeof marketId !== "string") {
+      res.status(StatusCode.BAD_REQUEST).json({
+        error: "You must provide an ID."
+      });
+      return;
+    }
+
+    try {
+      
+      await this.repository.delete(marketId);
+
+      res.status(StatusCode.NO_CONTENT).send();
+
+    } catch (error) {
+
+      if (error instanceof HttpNotFoundError) {
+        res.status(StatusCode.NOT_FOUND).json({
+          error: {
+            message: error.message,
+          },
+        });
+        return;
+      }
+
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
+        error: {
+          message: "Failed to update market.",
+        },
+      });
+    }
+  } 
 }
 
 export default new MarketController(new MarketRepository());

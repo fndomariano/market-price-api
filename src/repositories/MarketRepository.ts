@@ -7,21 +7,23 @@ import { HttpNotFoundError } from '../errors/HttpNotFoundError';
 export class MarketRepository {
 
   public async insert(name : string) : Promise<InsertMarket> {
-    
     const id = uuidv4()
 
     const newMarket = await db.insert(markets).values({ id, name }).returning();
     
     return insertMarketSchema.parse(newMarket[0]);
-
   }
 
   public async update(id : string, name: string) : Promise<void> {
     const market = await this.findByIdOrThrowNotFound(id);
-    if (market !== null) {
-      console.log(market);
+    if (market !== null) 
       await db.update(markets).set({ name }).where(eq(markets.id, market.id));
-    }
+  }
+
+  public async delete(id : string) : Promise<void> {
+    const market = await this.findByIdOrThrowNotFound(id);
+    if (market !== null) 
+      await db.delete(markets).where(eq(markets.id, market.id));
   }
 
   public async findAll() : Promise<Market[]> {
