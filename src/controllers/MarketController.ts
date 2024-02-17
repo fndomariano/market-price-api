@@ -15,9 +15,31 @@ class MarketController {
   
   public async index(req: Request, res: Response) {
     
+    const query = req.query;
+    const page = Number(query.page);
+    const pageSize = Number(query.pageSize);
+    
+    if (query.page && isNaN(page)) {
+      res.status(StatusCode.BAD_REQUEST).json({
+        error: {
+          message: "page must be a number",
+        },
+      });
+      return;
+    }
+
+    if (query.pageSize && isNaN(pageSize)) {
+      res.status(StatusCode.BAD_REQUEST).json({
+        error: {
+          message: "pageSize must be a number",
+        },
+      });
+      return;
+    }
+
     try {
       
-      const markets = await this.repository.findAll();
+      const markets = await this.repository.findAll(page, pageSize);
 
       return res.status(StatusCode.OK).json({ data: markets });
 

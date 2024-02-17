@@ -26,8 +26,19 @@ export class MarketRepository {
       await db.delete(markets).where(eq(markets.id, market.id));
   }
 
-  public async findAll() : Promise<Market[]> {
-    const query = await db.select().from(markets);
+  public async findAll(page?:number, pageSize?:number) : Promise<Market[]> {
+
+    const currentPage: number = page || 1;
+    const currentLimit: number = pageSize || 10;
+    const offset: number = (currentPage - 1) * currentLimit;
+
+    const query = await db.select()
+      .from(markets)
+      .limit(currentLimit)
+      .offset(offset)
+      .orderBy(markets.name);
+
+
     return selectMarketSchema.array().parse(query);
   }
 
