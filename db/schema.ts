@@ -11,11 +11,10 @@ export const markets = pgTable('markets', {
 export const insertMarketSchema = createInsertSchema(markets, {
   id: z.string().uuid(),
   name: z.string().transform(value => value.replace(/\s+/g, ''))
-    .pipe(z.string().min(1, { message: 'This field is required' }))
-});
+                  .pipe(z.string().min(1, { message: "The market name is required" }))
+}).omit({ id : true });
 
 export type Market = InferSelectModel<typeof markets>
-export type InsertMarket = z.infer<typeof insertMarketSchema>
 
 // =================================================================
 
